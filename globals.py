@@ -1,0 +1,6 @@
+HOST = '10.100.102.6'
+PORT = 65432
+MAX_CONNECTIONS = 8
+MAX_RETRIES = 3
+MAX_MSG_LEN = 2048
+PATH = __file__[:-10] + "files/"
