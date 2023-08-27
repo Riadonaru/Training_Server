@@ -4,6 +4,7 @@ import signal
 import socket
 import os
 import threading
+import random
 from typing import List
 
 from client import Client
@@ -38,6 +39,7 @@ class Server():
                     msg.send()
         os.kill(os.getpid(), signal.SIGTERM)
 
+
     def client_command(self, command: str):
         if len(self.clients) > 0:
             target_client = self.clients[self.target_client_id]
@@ -64,8 +66,9 @@ class Server():
                 if i >= globals.MAX_RETRIES - 1:
                     raise socket.error(e)
         self.clients: List[Client] = []
+        self.manual_mode = threading.Event()
+        self.manual_mode.set()
         self.inp_thread = threading.Thread(target=self.usr_inpt)
-        self.thread = threading.Thread(target=self.run)
         self.target_client_id = 0
         self.commands = {
             "help": self.help,
@@ -88,7 +91,7 @@ class Server():
             inpt = input()
             if inpt:
                 splinpt = inpt.split(maxsplit=1)
-                if splinpt in self.commands.keys():
+                if splinpt[0] in self.commands.keys():
                     self.commands[splinpt[0]]("" if len(splinpt) <= 1 else splinpt[1])
                     continue
                 self.client_command(inpt)
@@ -115,6 +118,9 @@ class Server():
                     print()
             else:
                 msg.print_content()
+
+            if msg.get_content().split(maxsplit=1)[0] == "solve":
+                client.solve()
 
             if msg.get_content().split(maxsplit=1)[0] == "get":
                 get = True
